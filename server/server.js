@@ -51,7 +51,7 @@ const genfun = generator()
 genfun.next()
 bot.on('message', async msg => {
 try {
-    const { id } = msg.from 
+    const { id } = msg.from
     if(msg.from.is_bot || msg.text == '/start') return ;
 if(!user[id] || languages.includes(msg.text)){
      count = 0
