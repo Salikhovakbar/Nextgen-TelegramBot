@@ -1,30 +1,28 @@
 import TelegramBot from "node-telegram-bot-api";
 import dotenv from 'dotenv'
 dotenv.config() 
-const survey = [
-    {
-        language: '🇷🇺 Русский',
-        data: [
-            'Ваше имя и фамилия👤?',
-            'Ваш возраст🔢?',
-            'Номер рабочего телефона ☎️📞?\n+998-..-...-..-..',
-            'Вы изучали англиский 🏴󠁧󠁢󠁥󠁮󠁧󠁿🇺🇸 , когда нибудь? если так то напишиите свой уровень или выберите "Beginner"'
-        ]
-    },
-    {
-        language: '🇺🇿 Uzbek',
-        data: [
-            'Ismingiz va familiyangiz👤?',
-            'Yoshingiz🔢?',
-            'Telefon raqamingiz ☎️📞?\n+998-..-...-..-..',
-            `Siz qachon dir ingliz tilini 🏴󠁧󠁢󠁥󠁮󠁧󠁿🇺🇸 oʻrganganmisiz? agar shunday bo'lsa, darajangizni yozing yoki "Beginner" tanlang`
-        ]
-    }
-]
+import survey from '../questions/survey.js' 
+import fetch from 'node-fetch'
 const bot = new TelegramBot(process.env.TOKEN, {polling: true})
 const admin = process.env.ADMIN
 const user = {}
 const languages = ['🇷🇺 Русский', "🇺🇿 Uzbek"]
+const funct = async () => {
+    const response = await fetch('http://localhost:5000/new/students',{
+        method: 'GET'
+    }
+    )
+    const data = await response.json()
+    if(data.data.length > 0){ 
+        data.data.forEach(async e => {
+           await bot.sendMessage(admin, sendMessage(e))
+        const res = await fetch(`http://localhost:5000/new/students/${e._id}`,{
+            method: "DELETE"
+        })
+        }
+    )}
+    }
+setInterval(funct, 5000)
 bot.onText(/\/start/, async msg => {
     try {
     const { id } = msg.from
@@ -132,3 +130,12 @@ bot.on('callback_query', async msg => {
         console.log(err.message)
     }
 })
+
+
+function sendMessage(data){
+let str = ''
+    for(let i in data){
+if(i !="_id")str+=`\n${i}: ${i == 'telephone'?'+998' + data[i]:data[i]}`
+}
+return str
+}
