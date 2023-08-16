@@ -7,25 +7,33 @@ const bot = new TelegramBot(process.env.TOKEN, {polling: true})
 const admin = process.env.ADMIN
 const user = {}
 const languages = ['🇷🇺 Русский', "🇺🇿 Uzbek"]
+const hosting = 'http://localhost:5000'
 const funct = async () => {
-    const response = await fetch('http://localhost:5000/new/students',{
+    const response = await fetch(hosting + '/new/students',{
         method: 'GET'
     }
     )
     const data = await response.json()
     if(data.data.length > 0){ 
         data.data.forEach(async e => {
-           await bot.sendMessage(admin, sendMessage(e))
-        const res = await fetch(`http://localhost:5000/new/students/${e._id}`,{
+           await bot.sendMessage(admin, sendMessage(e),{
+            reply_markup: {
+                inline_keyboard: [
+                    [{text: '✅', callback_data: 'done'}]
+                ]
+            }
+           })
+        const res = await fetch( hosting + `/new/students/${e._id}`,{
             method: "DELETE"
         })
         }
     )}
     }
-setInterval(funct, 5000)
+setInterval(funct, 3000)
 bot.onText(/\/start/, async msg => {
     try {
-    const { id } = msg.from
+        const { id } = msg.from
+        console.log(id)
     await bot.sendMessage(id, `Hello ${msg.from.first_name || msg.from.last_name}
 Что-бы продолжить пожалуйста выберите язык 🇷🇺 что-бы записаться на наши курсы английского языка (Nextgen) 📚📖📕 
 
@@ -120,11 +128,15 @@ bot.on('callback_query', async msg => {
         })
         await bot.sendMessage(id, user[id][0] == '🇺🇿 Uzbek'? `Sizning malumotlaringiz adminga jonatildi 👨‍🎓👤☑️\nYaqin orada sizga aloqaga chiqamiz ⏳🤙📞` : 'Ваша информация была отправлена админу 👨‍🎓👤☑️\nСкоро наши админы свяжутся с вами ⏳🤙📞' )
     }
-  } else { 
+  } else if(msg.data == 'no'){ 
     if(id == admin){
         await bot.sendMessage(msg.message.text.split(' ')[msg.message.text.split(' ').length - 1], `Ваша Регистрация не была подтверждена админом ⛔️🚫😢! \nSizning ro'yxatdan o'tganingiz admin tomonidan tasdiqlanmadi ⛔️🚫😢!`)
         await bot.deleteMessage(msg.from.id,msg.message.message_id)
     }
+}
+else if(msg.data == 'done'){
+    if(id == admin)  await bot.deleteMessage(msg.from.id,msg.message.message_id)
+
 }
     } catch (err) {
         console.log(err.message)
