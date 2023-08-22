@@ -33,7 +33,6 @@ setInterval(funct, 3000)
 bot.onText(/\/start/, async msg => {
     try {
         const { id } = msg.from
-        console.log(id)
     await bot.sendMessage(id, `Hello ${msg.from.first_name || msg.from.last_name}
 Что-бы продолжить пожалуйста выберите язык 🇷🇺 что-бы записаться на наши курсы английского языка (Nextgen) 📚📖📕 
 
